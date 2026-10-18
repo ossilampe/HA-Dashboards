@@ -1,0 +1,1254 @@
+button_card_templates:
+  vic_base:
+    show_name: false
+    show_icon: false
+    show_state: false
+    show_label: false
+    tap_action:
+      action: none
+    hold_action:
+      action: none
+    double_tap_action:
+      action: none
+    variables:
+      m: false
+      num: "[[[ return (e) => { const s = states[e]; return s ? parseFloat(s.state) : NaN; }; ]]]"
+      st: "[[[ return (e) => states[e] ? String(states[e].state) : 'unknown'; ]]]"
+      f: "[[[ const num = variables.num; return (e, d, u, pre) => { const n = num(e); return (pre || '') + (isNaN(n) ? '--' : n.toFixed(d).replace('.', ',')) + (u || ''); }; ]]]"
+      W: "[[[ return (n) => isNaN(n) ? '-- W' : (Math.abs(n) >= 1000 ? (n / 1000).toFixed(2).replace('.', ',') + ' kW' : Math.round(n) + ' W'); ]]]"
+      sum: "[[[ const num = variables.num; return (ids) => { let t = 0, ok = false; ids.forEach(e => { const n = num(e); if (!isNaN(n)) { t += n; ok = true; } }); return ok ? t : NaN; }; ]]]"
+      DE: "[[[ const m = {OFF:'Aus', LOW_POWER:'Energiesparen', FAULT:'Fehler', BULK:'Bulk', ABSORPTION:'Absorption', FLOAT:'Float', STORAGE:'Erhaltung', EQUALIZE:'Ausgleich', PASSTHRU:'Durchleitung', INVERTING:'Wechselrichten', POWER_ASSIST:'Power Assist', POWER_SUPPLY:'Netzteil', EXTERNAL_CONTROL:'Extern', IDLE:'Ruhe', CHARGING:'Lädt', DISCHARGING:'Entlädt', UNAVAILABLE:'offline', UNKNOWN:'--'}; return (s) => { const k = String(s || '').toUpperCase(); return m[k] || s; }; ]]]"
+      T: "[[[ return (x, y, s, size, col, a, w) => `<text x='${x}' y='${y}' font-size='${size}' fill='${col || '#FFFFFF'}' text-anchor='${a || 'start'}' dominant-baseline='hanging' font-weight='${w || 400}'>${s}</text>`; ]]]"
+      R: "[[[ return (x, y, w, h, r, fill, stroke, sw) => `<rect x='${x}' y='${y}' width='${w}' height='${h}' rx='${r}' fill='${fill}' stroke='${stroke || 'none'}' stroke-width='${sw || 0}'/>`; ]]]"
+      C: "[[[ return (cx, cy, r, fill) => `<circle cx='${cx}' cy='${cy}' r='${r}' fill='${fill}'/>`; ]]]"
+      PILL: "[[[ const R = variables.R, T = variables.T; return (xr, y, txt, bg, fg) => { const w = String(txt).length * 7.6 + 22; return R(xr - w, y, w, 24, 12, bg) + T(xr - w / 2, y + 6, txt, 12, fg, 'middle', 700); }; ]]]"
+      SVG: "[[[ return (w, h, body) => `<svg viewBox='0 0 ${w} ${h}' width='100%' style='display:block' font-family='Roboto, Arial, sans-serif' xmlns='http://www.w3.org/2000/svg'><rect x='0' y='0' width='${w}' height='${h}' fill='#0F1A26'/>` + body + `</svg>`; ]]]"
+      BOX: "[[[ const R = variables.R, T = variables.T; return (x, y, w, h, col, title, big, bigCol, subs, mob) => { const z = mob ? {t: 12, hh: 26, b: 22, by: 34, s: 11, sy: 64, sl: 16} : {t: 13, hh: 28, b: 26, by: 38, s: 12, sy: 76, sl: 18}; let s = R(x, y, w, h, 12, '#18293B', '#24384E', 1) + R(x, y, w, z.hh, 12, col) + R(x, y + z.hh - 12, w, 12, 0, col) + T(x + 12, y + 7, title, z.t, '#0F1A26', 'start', 700) + T(x + 12, y + z.by, big, z.b, bigCol, 'start', 700); (subs || []).forEach((t, k) => { if (t) s += T(x + 12, y + z.sy + k * z.sl, t, z.s, '#9FB3C8'); }); return s; }; ]]]"
+      FLOW: "[[[ return (d, pw, col) => { let s = `<path d='${d}' fill='none' stroke='#2B4560' stroke-width='3' stroke-linejoin='round'/>`; if (isNaN(pw) || Math.abs(pw) < 5) return s; const dur = Math.max(0.8, Math.min(4, 4.5 - Math.log10(Math.abs(pw)))).toFixed(2); const kp = pw >= 0 ? '0;1' : '1;0'; for (let k = 0; k < 3; k++) s += `<circle r='4.5' fill='${col}'><animateMotion dur='${dur}s' begin='-${(k * dur / 3).toFixed(2)}s' repeatCount='indefinite' path='${d}' keyPoints='${kp}' keyTimes='0;1' calcMode='linear'/></circle>`; return s; }; ]]]"
+      MPPT: "[[[ const R = variables.R, T = variables.T, C = variables.C; return (x, y, on, led) => { let b = R(x, y, 110, 150, 10, '#1D5FAE', '#2F78CC', 1); for (let i = 0; i < 9; i++) b += R(x + 9 + i * 10.4, y + 8, 5, 52, 2, '#164B8C'); b += R(x + 10, y + 68, 90, 44, 4, '#0B0F14'); b += T(x + 55, y + 75, 'victron energy', 9, '#FFFFFF', 'middle', 700); b += T(x + 55, y + 89, 'SmartSolar', 8, '#9FB6CF', 'middle'); b += T(x + 55, y + 99, 'MPPT', 8, '#9FB6CF', 'middle'); b += C(x + 92, y + 105, 3, on ? led : '#2A3440'); b += R(x + 8, y + 118, 94, 24, 4, '#2A2F36'); for (let i = 0; i < 4; i++) b += C(x + 22 + i * 22, y + 130, 5, '#8A939C'); return b; }; ]]]"
+      MULTI: "[[[ const R = variables.R, T = variables.T, C = variables.C; return (x, y, mains, inv, chg) => { let b = R(x, y, 120, 190, 10, '#1D5FAE', '#2F78CC', 1); b += R(x + 8, y + 8, 104, 72, 6, '#E8EDF2'); b += T(x + 60, y + 16, 'victron energy', 10, '#1D5FAE', 'middle', 700); b += T(x + 60, y + 32, 'MultiPlus-II', 10, '#2A3440', 'middle', 600); [[mains, '#3CCF5A'], [inv, '#3CCF5A'], [chg, '#F7AB3E']].forEach(([on, c], i) => { b += C(x + 34 + i * 26, y + 58, 4.5, on ? c : '#B8C2CC'); }); b += T(x + 34, y + 66, 'Netz', 6, '#5A6672', 'middle'); b += T(x + 60, y + 66, 'WR', 6, '#5A6672', 'middle'); b += T(x + 86, y + 66, 'Laden', 6, '#5A6672', 'middle'); for (let i = 0; i < 10; i++) b += R(x + 14, y + 92 + i * 8, 92, 3, 1.5, '#164B8C'); b += R(x + 8, y + 174, 104, 10, 3, '#0B0F14'); return b; }; ]]]"
+      MODULE: "[[[ const R = variables.R, T = variables.T, C = variables.C; return (x, y, w, n, soc, socTxt) => { let b = R(x, y, w, 28, 3, '#F2F4F6', '#C9D0D6', 1); b += R(x + 6, y + 6, 34, 16, 2, '#20262D'); b += T(x + 23, y + 9, String(n), 10, '#FFFFFF', 'middle', 700); b += T(x + 48, y + 9, (w < 220 ? '' : 'Pylontech ') + (n <= 2 ? 'US5000' : 'US2000'), 10, '#3A4A5A', 'start', 700); if (socTxt && w >= 220) b += T(x + w - 72, y + 9, socTxt, 10, '#3A4A5A', 'end', 600); const lit = isNaN(soc) ? 0 : Math.ceil(soc / 25); for (let k = 0; k < 4; k++) b += C(x + w - 60 + k * 11, y + 14, 3.5, k < lit ? '#3CCF5A' : '#C9D0D6'); b += C(x + w - 12, y + 14, 4, isNaN(soc) ? '#C9D0D6' : '#3CCF5A'); return b; }; ]]]"
+      BELL: "[[[ return (cx, cy, lvl) => { const col = lvl === 2 ? '#E5484D' : (lvl === 1 ? '#F7AB3E' : (lvl === 0 ? '#5DBE6E' : '#6E8399')); const an = lvl >= 1 ? `<animate attributeName='opacity' values='1;0.25;1' dur='1s' repeatCount='indefinite'/>` : ''; return `<g fill='${col}'>${an}<path d='M${cx - 7},${cy + 4} L${cx + 7},${cy + 4} L${cx + 5},${cy + 1} L${cx + 5},${cy - 3} A5,5 0 0 0 ${cx - 5},${cy - 3} L${cx - 5},${cy + 1} Z'/><circle cx='${cx}' cy='${cy + 6.5}' r='1.8'/><circle cx='${cx}' cy='${cy - 8.3}' r='1.3'/></g>`; }; ]]]"
+      PWR: "[[[ const R = variables.R; return (x, y, on) => { const col = on ? '#5DBE6E' : '#E5484D'; const cx = x + 20, cy = y + 13; return R(x, y, 40, 24, 12, '#0F1A26', col, 2) + `<path d='M${cx - 4.4},${cy - 4.4} A6.2,6.2 0 1 0 ${cx + 4.4},${cy - 4.4}' fill='none' stroke='${col}' stroke-width='2' stroke-linecap='round'/><line x1='${cx}' y1='${cy - 8}' x2='${cx}' y2='${cy - 1}' stroke='${col}' stroke-width='2' stroke-linecap='round'/>`; }; ]]]"
+    styles:
+      card:
+        - background-color: "#0F1A26"
+        - padding: "0"
+        - border-radius: 14px
+        - overflow: hidden
+        - border: "1px solid #1F3247"
+      grid:
+        - grid-template-areas: "\"svg\""
+        - grid-template-columns: 1fr
+        - grid-template-rows: auto
+      custom_fields:
+        svg:
+          - width: 100%
+          - line-height: "0"
+    extra_styles: "#soc_minus, #soc_plus { display: block !important; } #soc_minus > *, #soc_plus > * { display: block; width: 100% !important; min-width: 100%; height: 100%; cursor: pointer; } [id^='t_'] { display: block !important; } [id^='t_'] > * { display: block; width: 100% !important; min-width: 100%; height: 100%; cursor: pointer; }"
+  vic_flow:
+    template: vic_base
+    triggers_update:
+      - sensor.gx_device_netz_leistung_l1
+      - sensor.gx_device_netz_leistung_l2
+      - sensor.gx_device_netz_leistung_l3
+      - sensor.gx_device_verbrauch_leistung_l1
+      - sensor.gx_device_verbrauch_leistung_l2
+      - sensor.gx_device_verbrauch_leistung_l3
+      - sensor.victron_system_dc_pv_power
+      - sensor.gx_device_solar_erzeugung_taglich
+      - sensor.victron_system_battery_power
+      - sensor.victron_system_battery_soc
+      - sensor.victron_system_battery_voltage
+      - sensor.victron_system_battery_current
+      - sensor.victron_system_battery_state
+      - sensor.victron_system_battery_time_to_go
+      - sensor.victron_vebus_state_227
+      - sensor.gx_device_systemzustand_2
+      - sensor.multiplus_ii_1_wechselrichter_dc_leistung
+      - sensor.gx_device_dc_verbrauch_2
+      - sensor.multiplus_ii_1_ve_bus_gerat_0_inverter_leistung
+      - sensor.multiplus_ii_1_ve_bus_gerat_1_inverter_leistung
+      - sensor.multiplus_ii_1_ve_bus_gerat_2_inverter_leistung
+    custom_fields:
+      svg: "[[[ const v = variables; const mob = v.m; const g = ['l1', 'l2', 'l3']; const grid = v.sum(g.map(p => 'sensor.gx_device_netz_leistung_' + p)); const load = v.sum(g.map(p => 'sensor.gx_device_verbrauch_leistung_' + p)); const pv = v.num('sensor.victron_system_dc_pv_power'); const bat = v.num('sensor.victron_system_battery_power'); const soc = v.num('sensor.victron_system_battery_soc'); const mdc = v.num('sensor.multiplus_ii_1_wechselrichter_dc_leistung'); const dcl = v.num('sensor.gx_device_dc_verbrauch_2'); const inv = v.sum([0, 1, 2].map(i => 'sensor.multiplus_ii_1_ve_bus_gerat_' + i + '_inverter_leistung')); const ttg = v.num('sensor.victron_system_battery_time_to_go'); const ttgTxt = !isNaN(ttg) && ttg > 0 ? Math.floor(ttg / 3600) + ' h ' + Math.round((ttg % 3600) / 60) + ' min' : '--'; const socCol = isNaN(soc) ? '#FFFFFF' : (soc < 20 ? '#E5484D' : (soc < 50 ? '#F7AB3E' : '#5DBE6E')); const ph = (pre) => g.map(p => p.toUpperCase() + ' ' + Math.round(v.num(pre + p) || 0) + ' W').join(' · '); const gridSub = [!isNaN(grid) && grid < 0 ? 'Einspeisung' : 'Bezug', ph('sensor.gx_device_netz_leistung_')]; const multiSub = ['Wechselrichter ' + v.W(inv), 'ESS: ' + v.st('sensor.gx_device_systemzustand_2').replace('_', ' ')]; const batSub = [v.W(bat) + ' · ' + v.f('sensor.victron_system_battery_voltage', 1, ' V') + ' · ' + v.f('sensor.victron_system_battery_current', 1, ' A'), v.DE(v.st('sensor.victron_system_battery_state')) + ' · Rest ' + ttgTxt]; const socTxt = isNaN(soc) ? '-- %' : Math.round(soc) + ' %'; const vb = v.DE(v.st('sensor.victron_vebus_state_227')); let b = ''; if (!mob) { b += `<path d='M120,190 L840,190' fill='none' stroke='#2B4560' stroke-width='3'/>`; b += v.FLOW('M220,80 L380,80', grid, '#9FB3C8'); b += v.FLOW('M580,80 L740,80', load, '#4AB9C1'); b += v.FLOW('M480,140 L480,190', mdc, '#387DC5'); b += v.FLOW('M120,190 L120,230', bat, '#5DBE6E'); b += v.FLOW('M480,230 L480,190', pv, '#F7AB3E'); b += v.FLOW('M840,190 L840,230', dcl, '#C58AE0'); b += v.BOX(20, 20, 200, 120, '#9FB3C8', 'NETZ', v.W(grid), '#FFFFFF', gridSub); b += v.BOX(380, 20, 200, 120, '#387DC5', 'MULTIPLUS-II × 3', vb, '#FFFFFF', multiSub); b += v.BOX(740, 20, 200, 120, '#4AB9C1', 'AC-VERBRAUCHER', v.W(load), '#FFFFFF', [ph('sensor.gx_device_verbrauch_leistung_')]); b += v.BOX(20, 230, 200, 120, socCol, 'BATTERIE', socTxt, socCol, batSub); b += v.BOX(380, 230, 200, 120, '#F7AB3E', 'SOLAR (MPPT × 3)', v.W(pv), '#F7AB3E', ['Heute ' + v.f('sensor.gx_device_solar_erzeugung_taglich', 2, ' kWh')]); b += v.BOX(740, 230, 200, 120, '#C58AE0', 'DC-VERBRAUCHER', v.W(dcl), '#FFFFFF', []); return v.SVG(960, 370, b); } b += `<path d='M105,305 L295,305' fill='none' stroke='#2B4560' stroke-width='3'/>`; b += v.FLOW('M105,130 L105,225 L115,225', grid, '#9FB3C8'); b += v.FLOW('M285,225 L295,225 L295,130', load, '#4AB9C1'); b += v.FLOW('M200,280 L200,305', mdc, '#387DC5'); b += v.FLOW('M105,305 L105,330', bat, '#5DBE6E'); b += v.FLOW('M295,330 L295,305', pv, '#F7AB3E'); b += v.BOX(20, 20, 170, 110, '#9FB3C8', 'NETZ', v.W(grid), '#FFFFFF', gridSub, true); b += v.BOX(210, 20, 170, 110, '#4AB9C1', 'AC-VERBRAUCHER', v.W(load), '#FFFFFF', [ph('sensor.gx_device_verbrauch_leistung_')], true); b += v.BOX(115, 170, 170, 110, '#387DC5', 'MULTIPLUS-II × 3', vb, '#FFFFFF', multiSub, true); b += v.BOX(20, 330, 170, 110, socCol, 'BATTERIE', socTxt, socCol, batSub, true); b += v.BOX(210, 330, 170, 110, '#F7AB3E', 'SOLAR (MPPT × 3)', v.W(pv), '#F7AB3E', ['Heute ' + v.f('sensor.gx_device_solar_erzeugung_taglich', 2, ' kWh')], true); b += v.R(20, 456, 360, 44, 12, '#18293B', '#24384E', 1) + v.R(20, 456, 6, 44, 3, '#C58AE0') + v.T(38, 471, 'DC-VERBRAUCHER', 12, '#9FB3C8', 'start', 700) + v.T(366, 467, v.W(dcl), 20, '#FFFFFF', 'end', 700); return v.SVG(400, 516, b); ]]]"
+  vic_energy:
+    template: vic_base
+    triggers_update:
+      - sensor.gx_device_solar_erzeugung_taglich
+      - sensor.vrm_today_grid_energy_in
+      - sensor.vrm_today_grid_energy_out
+      - sensor.vrm_today_consumption
+      - sensor.strom_strombezug_ebz_inop
+      - sensor.strom_strom_einspeisung_ebz_outop_taglich
+      - sensor.verbrauch_energie_heute
+      - sensor.gx_device_batterie_in
+      - sensor.gx_device_baterie_out
+      - sensor.stromleser_ebz_e_inop
+      - sensor.stromleser_ebz_e_outop
+    custom_fields:
+      svg: "[[[ const v = variables; const mob = v.m; const pick = (a, b) => { const n = v.num(a); return isNaN(n) ? v.num(b) : n; }; const solar = v.num('sensor.gx_device_solar_erzeugung_taglich'); const gin = pick('sensor.vrm_today_grid_energy_in', 'sensor.strom_strombezug_ebz_inop'); const gout = pick('sensor.vrm_today_grid_energy_out', 'sensor.strom_strom_einspeisung_ebz_outop_taglich'); const cons = pick('sensor.vrm_today_consumption', 'sensor.verbrauch_energie_heute'); const bin = v.num('sensor.gx_device_batterie_in'); const bout = v.num('sensor.gx_device_baterie_out'); const k = (n) => isNaN(n) ? '--' : n.toFixed(n < 10 ? 2 : 1).replace('.', ','); const pct = (n) => isNaN(n) ? '--' : Math.round(Math.max(0, Math.min(100, n))) + ' %'; const aut = (!isNaN(cons) && cons > 0 && !isNaN(gin)) ? (1 - gin / cons) * 100 : NaN; const eig = (!isNaN(solar) && solar > 0 && !isNaN(gout)) ? (1 - gout / solar) * 100 : NaN; const tiles = [['SOLAR ERZEUGT', solar, '#F7AB3E', 'Eigenverbrauch ' + pct(eig)], ['EINGESPEIST', gout, '#9FB3C8', 'ins Netz'], ['AUS DEM NETZ', gin, '#E07A5F', 'Netzbezug'], ['GESAMTVERBRAUCH', cons, '#4AB9C1', 'Autarkie ' + pct(aut)], ['IN DEN AKKU', bin, '#5DBE6E', 'geladen'], ['AUS DEM AKKU', bout, '#C58AE0', 'entladen']]; const zb = v.num('sensor.stromleser_ebz_e_inop'); const ze = v.num('sensor.stromleser_ebz_e_outop'); const fz = (n) => isNaN(n) ? '--' : n.toLocaleString('de-DE', {maximumFractionDigits: 1}); const meters = [['ZÄHLERSTAND BEZUG', zb, '#E07A5F'], ['ZÄHLERSTAND EINSPEISUNG', ze, '#9FB3C8']]; let b = ''; if (!mob) { tiles.forEach(([t, n, col, sub], i) => { const x = 16 + i * 156, y = 16; b += v.R(x, y, 148, 128, 12, '#18293B', '#24384E', 1) + v.R(x, y, 148, 6, 3, col); b += v.T(x + 14, y + 20, t, 12, '#8AA0B6', 'start', 700); b += v.T(x + 14, y + 44, k(n), 30, col, 'start', 700); b += v.T(x + 14, y + 80, 'kWh', 13, '#9FB3C8', 'start', 600); b += v.T(x + 14, y + 104, sub, 12, '#6E8399'); }); meters.forEach(([t, n, col], i) => { const x = 16 + i * 472, y = 158; b += v.R(x, y, 456, 74, 12, '#18293B', '#24384E', 1) + v.R(x, y, 6, 74, 3, col); b += v.T(x + 20, y + 14, t, 12, '#8AA0B6', 'start', 700); b += v.T(x + 440, y + 15, 'eBZ-Zähler', 11, '#6E8399', 'end'); b += v.T(x + 20, y + 34, fz(n) + `<tspan font-size='14' fill='#9FB3C8' font-weight='600'> kWh</tspan>`, 26, '#FFFFFF', 'start', 700); }); return v.SVG(960, 246, b); } tiles.forEach(([t, n, col, sub], i) => { const x = 16 + (i % 2) * 192, y = 12 + Math.floor(i / 2) * 100; b += v.R(x, y, 176, 90, 12, '#18293B', '#24384E', 1) + v.R(x, y, 6, 90, 3, col); b += v.T(x + 18, y + 12, t, 11, '#8AA0B6', 'start', 700); b += v.T(x + 18, y + 32, k(n) + `<tspan font-size='13' fill='#9FB3C8' font-weight='600'> kWh</tspan>`, 24, col, 'start', 700); b += v.T(x + 18, y + 66, sub, 11, '#6E8399'); }); meters.forEach(([t, n, col], i) => { const x = 16 + i * 192, y = 312; b += v.R(x, y, 176, 90, 12, '#18293B', '#24384E', 1) + v.R(x, y, 6, 90, 3, col); b += v.T(x + 18, y + 12, t, 10, '#8AA0B6', 'start', 700); b += v.T(x + 18, y + 32, fz(n) + `<tspan font-size='12' fill='#9FB3C8' font-weight='600'> kWh</tspan>`, 20, '#FFFFFF', 'start', 700); b += v.T(x + 18, y + 66, 'eBZ-Zähler', 11, '#6E8399'); }); return v.SVG(400, 414, b); ]]]"
+  vic_mppt:
+    template: vic_base
+    custom_fields:
+      svg: "[[[ const v = variables; const mob = v.m; const p = 'sensor.victron_solarcharger_'; const s = v.id; const raw = v.st(p + 'state_' + s); const up = raw.toUpperCase(); const on = !['OFF', 'UNAVAILABLE', 'UNKNOWN'].includes(up); const pillBg = up === 'FAULT' ? '#E5484D' : (on ? '#F7AB3E' : '#2B3B4C'); const pillFg = on || up === 'FAULT' ? '#0F1A26' : '#9FB3C8'; const led = up === 'FLOAT' ? '#3CCF5A' : '#F7AB3E'; const tr = [0, 1, 2, 3].map(i => v.num(p + 'tracker_' + i + '_pv_power_' + s)); let b = ''; b += v.T(16, 14, v.name, mob ? 17 : 18, '#FFFFFF', 'start', 700); b += v.T(16, 36, 'Instanz ' + s, 11, '#6E8399'); b += v.PILL(384, 12, v.DE(raw), pillBg, pillFg); const alS = [v.st(p + 'alarm_' + s), v.st(p + 'alarm_highvoltage_' + s), v.st(p + 'alarm_lowvoltage_' + s)].map(x => x.toUpperCase()); const ec = v.st(p + 'errorcode_' + s).toUpperCase(); const lvl = (alS.includes('ALARM') || !['NONE', '0', 'UNKNOWN', 'UNAVAILABLE', 'NONDECODABLE'].includes(ec)) ? 2 : (alS.includes('WARNING') ? 1 : 0); b += v.BELL(186, 24, lvl); b += v.PWR(202, 12, v.st('select.victron_solarcharger_mode_' + s).toUpperCase() === 'ON'); const x0 = mob ? 118 : 145; const row = (y, key, val) => { b += v.T(x0, y, key, 11, '#8AA0B6', 'start', 600); b += v.T(384, y - 2, val, mob ? 14 : 15, '#FFFFFF', 'end', 600); }; if (mob) { b += `<g transform='translate(16,52) scale(0.76)'>` + v.MPPT(0, 0, on, led) + `</g>`; } else { b += v.MPPT(16, 60, on, led); } const yb = mob ? 52 : 60; b += v.T(x0, yb, 'PV-LEISTUNG', 11, '#8AA0B6', 'start', 600); b += v.T(x0, yb + 16, v.W(v.num(p + 'yield_power_' + s)), mob ? 26 : 30, '#F7AB3E', 'start', 700); const y1 = mob ? 102 : 122, dy = mob ? 22 : 26; row(y1, 'PV', v.f(p + 'pv_voltage_' + s, 1, ' V') + ' · ' + v.f(p + 'pv_current_' + s, 1, ' A')); row(y1 + dy, 'BATTERIE', v.f(p + 'battery_voltage_' + s, 2, ' V') + ' · ' + v.f(p + 'battery_current_' + s, 1, ' A')); row(y1 + 2 * dy, 'ERTRAG HEUTE', v.f(p + 'yield_today_' + s, 2, ' kWh')); row(y1 + 3 * dy, 'MAX. HEUTE', v.W(v.num(p + 'maxpower_today_' + s))); if (mob) { b += v.R(16, 196, 368, 30, 8, '#18293B', '#24384E', 1); b += v.T(28, 205, 'TRACKER', 11, '#8AA0B6', 'start', 700); b += v.T(372, 204, tr.map(n => isNaN(n) ? '--' : Math.round(n)).join(' · ') + ' W', 13, '#FFFFFF', 'end', 600); return v.SVG(400, 238, b); } for (let i = 0; i < 4; i++) { const x = 16 + i * 94; b += v.R(x, 226, 86, 58, 8, '#18293B', '#24384E', 1); b += v.T(x + 10, 234, 'Tracker ' + (i + 1), 11, '#8AA0B6', 'start', 600); b += v.T(x + 10, 254, v.W(tr[i]), 16, '#FFFFFF', 'start', 700); } return v.SVG(400, 300, b); ]]]"
+  vic_multi:
+    template: vic_base
+    custom_fields:
+      svg: "[[[ const v = variables; const mob = v.m; const ph = v.ph; const n = v.dev; const w = 'sensor.multiplus_ii_1_wechselrichter_'; const raw = v.st('sensor.victron_vebus_state_227'); const up = raw.toUpperCase(); const inV = v.num(w + 'eingangsspannung_' + ph); const invP = v.num('sensor.multiplus_ii_1_ve_bus_gerat_' + n + '_inverter_leistung'); const chg = ['BULK', 'ABSORPTION', 'FLOAT', 'STORAGE', 'EQUALIZE'].includes(up); const pillBg = up === 'FAULT' ? '#E5484D' : (up === 'OFF' || up === 'UNAVAILABLE' ? '#2B3B4C' : '#387DC5'); const mains = !isNaN(inV) && inV > 180; const invOn = up === 'INVERTING' || (!isNaN(invP) && Math.abs(invP) > 30); let b = ''; b += v.T(16, 14, v.name, mob ? 17 : 18, '#FFFFFF', 'start', 700); b += v.T(16, 36, 'VE.Bus Gerät ' + n + ' · Phase ' + ph.toUpperCase(), 11, '#6E8399'); b += v.PILL(384, 12, v.DE(raw), pillBg, '#FFFFFF'); const va = 'sensor.victron_vebus_alarm_'; const al = [va + ph + '_overload_227', va + ph + '_lowbattery_227', va + ph + '_higtemperature_227', va + ph + '_ripple_227', va + 'overload_227', va + 'lowbattery_227', va + 'hightemperature_227', va + 'temperaturesensor_227', va + 'voltagesensor_227', va + 'phaserotation_227'].map(e => v.st(e).toUpperCase()); const err = v.st('sensor.victron_vebus_error_227').toUpperCase(); const lvl = (al.includes('ALARM') || !['OK', 'UNKNOWN', 'UNAVAILABLE', '0'].includes(err)) ? 2 : (al.includes('WARNING') ? 1 : 0); b += v.BELL(222, 24, lvl); const x0 = mob ? 106 : 155; const blk = (y, k, line, big, col) => { b += v.T(x0, y, k, 11, '#8AA0B6', 'start', 600); b += v.T(384, y - 1, line, mob ? 12 : 13, '#9FB3C8', 'end'); b += v.T(x0, y + 15, big, mob ? 19 : 22, col, 'start', 700); }; const ys = mob ? [54, 102, 150] : [60, 120, 180]; if (mob) { b += `<g transform='translate(16,54) scale(0.6)'>` + v.MULTI(0, 0, mains, invOn, chg) + `</g>`; } else { b += v.MULTI(16, 58, mains, invOn, chg); } blk(ys[0], 'AC-EINGANG', v.f(w + 'eingangsspannung_' + ph, 0, ' V') + ' · ' + v.f(w + 'eingangsfrequenz_' + ph, 2, ' Hz'), v.W(v.num(w + 'eingangsleistung_' + ph)), '#9FB3C8'); blk(ys[1], 'AC-AUSGANG', v.f(w + 'ausgangsspannung_' + ph, 0, ' V') + ' · ' + v.f(w + 'ausgangsstrom_' + ph, 2, ' A'), v.W(v.num(w + 'ausgangsleistung_' + ph)), '#4AB9C1'); blk(ys[2], 'WECHSELRICHTER', v.f(w + 'ausgangsfrequenz_' + ph, 2, ' Hz'), v.W(invP), '#387DC5'); const yd = mob ? 196 : 256; b += v.R(16, yd, 368, 32, 8, '#18293B', '#24384E', 1); b += v.T(28, yd + 9, 'DC-Bus', 12, '#8AA0B6', 'start', 600); b += v.T(372, yd + 8, v.f('sensor.multiplus_ii_1_dc_voltage', 2, ' V') + ' · Schein ' + v.f(w + 'ausgangs_scheinleistung_' + ph, 0, ' VA'), 13, '#FFFFFF', 'end', 600); return v.SVG(400, mob ? 240 : 300, b); ]]]"
+  vic_pylon:
+    template: vic_base
+    triggers_update:
+      - sensor.pylontech_battery_id_512_batterieladung
+      - sensor.pylontech_battery_id_512_batterieleistung
+      - sensor.pylontech_battery_id_512_dc_busspannung
+      - sensor.pylontech_battery_id_512_dc_busstrom
+      - sensor.pylontech_battery_id_512_batterietemperatur
+      - sensor.pylontech_battery_id_512_batteriezustand_soh
+      - sensor.pylontech_battery_id_512_anzahl_module_online
+      - sensor.pylontech_battery_id_512_anzahl_module_offline
+      - sensor.pylontech_battery_id_512_minimale_zellspannung_2
+      - sensor.pylontech_battery_id_512_maximale_zellspannung_2
+      - sensor.pylontech_battery_id_512_minimale_zelltemperatur_2
+      - sensor.pylontech_battery_id_512_maximale_zelltemperatur_2
+      - sensor.pylontech_battery_id_512_maximal_zulassiger_ladestrom_2
+      - sensor.pylontech_battery_id_512_maximal_zulassiger_entladestrom_2
+      - sensor.victron_system_battery_state
+      - sensor.victron_system_battery_time_to_go
+      - sensor.pylontech_batterie_system_2_battery1_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery2_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery3_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery4_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery5_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery6_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery7_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery8_state_of_charge
+      - sensor.pylontech_batterie_system_2_battery9_state_of_charge
+      - number.gx_device_ess_mindest_soc_grenze
+      - sensor.gx_device_active_soc_limit
+    custom_fields:
+      svg: "[[[ const v = variables; const mob = v.m; const p = 'sensor.pylontech_battery_id_512_'; const soc = v.num(p + 'batterieladung'); const socCol = isNaN(soc) ? '#FFFFFF' : (soc < 20 ? '#E5484D' : (soc < 50 ? '#F7AB3E' : '#5DBE6E')); const raw = v.st('sensor.victron_system_battery_state'); const RU = raw.toUpperCase(); const ttg = v.num('sensor.victron_system_battery_time_to_go'); const ttgTxt = !isNaN(ttg) && ttg > 0 ? Math.floor(ttg / 3600) + ' h ' + Math.round((ttg % 3600) / 60) + ' min' : '--'; const W = mob ? 400 : 960; let b = ''; b += v.T(mob ? 16 : 20, 14, 'Pylontech · ' + v.f(p + 'anzahl_module_online', 0, '') + ' Module', mob ? 17 : 18, '#FFFFFF', 'start', 700); b += v.PILL(W - (mob ? 16 : 20), 12, v.DE(raw), RU === 'CHARGING' ? '#5DBE6E' : (RU === 'DISCHARGING' ? '#F7AB3E' : '#2B3B4C'), RU === 'IDLE' ? '#9FB3C8' : '#0F1A26'); const mods = []; for (let i = 0; i < 10; i++) { const ms = i < 9 ? v.num('sensor.pylontech_batterie_system_2_battery' + (i + 1) + '_state_of_charge') : NaN; mods.push([isNaN(ms) ? soc : ms, isNaN(ms) ? '' : Math.round(ms) + ' %']); } const tiles = [['LEISTUNG', v.W(v.num(p + 'batterieleistung'))], ['SPANNUNG', v.f(p + 'dc_busspannung', 2, ' V')], ['STROM', v.f(p + 'dc_busstrom', 1, ' A')], ['TEMPERATUR', v.f(p + 'batterietemperatur', 1, ' °C')], ['GESUNDHEIT (SOH)', v.f(p + 'batteriezustand_soh', 0, ' %')], ['KAPAZITÄT', v.f(p + 'installierte_batteriekapazitat', 0, ' Ah')], ['ZELLSPANNUNG MIN / MAX', v.f(p + 'minimale_zellspannung_2', 3, '') + ' / ' + v.f(p + 'maximale_zellspannung_2', 3, ' V')], ['ZELLTEMP. MIN / MAX', v.f(p + 'minimale_zelltemperatur_2', 1, '') + ' / ' + v.f(p + 'maximale_zelltemperatur_2', 1, ' °C')], ['MODULE ONLINE / OFFLINE', v.f(p + 'anzahl_module_online', 0, '') + ' / ' + v.f(p + 'anzahl_module_offline', 0, '')], ['MAX. LADESTROM', v.f(p + 'maximal_zulassiger_ladestrom_2', 0, ' A')], ['MAX. ENTLADESTROM', v.f(p + 'maximal_zulassiger_entladestrom_2', 0, ' A')], ['RESTLAUFZEIT', ttgTxt]]; const bar = (x, y, w, h) => { b += v.R(x, y, w, h, h / 2, '#18293B', '#24384E', 1); if (!isNaN(soc)) b += v.R(x, y, Math.max(h, w * soc / 100), h, h / 2, socCol); b += v.T(x + w / 2, y + h / 2 - 11, isNaN(soc) ? '-- %' : Math.round(soc) + ' %', 22, '#FFFFFF', 'middle', 700); }; const minSoc = v.num('number.gx_device_ess_mindest_soc_grenze'); const act = v.num('sensor.gx_device_active_soc_limit'); const lim = (x, y, w, h) => { b += v.R(x, y, w, h, h / 2, '#18293B', '#24384E', 1); if (!isNaN(minSoc)) b += v.R(x, y, Math.max(h, w * minSoc / 100), h, h / 2, '#387DC5'); b += v.T(x + w / 2, y + h / 2 - 11, 'Limit ' + (isNaN(minSoc) ? '--' : Math.round(minSoc)) + ' %', 22, '#FFFFFF', 'middle', 700); [['–', x + 4], ['+', x + w - 4 - (h - 4)]].forEach(([sg, xx]) => { b += v.R(xx, y + 2, h - 4, h - 4, (h - 4) / 2, '#0F1A26', '#8FA3B5', 2); const cx = xx + (h - 4) / 2, cy = y + h / 2, a = 7; b += `<line x1='${cx - a}' y1='${cy}' x2='${cx + a}' y2='${cy}' stroke='#FFFFFF' stroke-width='2.5' stroke-linecap='round'/>`; if (sg === '+') b += `<line x1='${cx}' y1='${cy - a}' x2='${cx}' y2='${cy + a}' stroke='#FFFFFF' stroke-width='2.5' stroke-linecap='round'/>`; }); }; if (!mob) { mods.forEach(([s2, t2], i) => { b += v.MODULE(20, 48 + i * 32, 300, i + 1, s2, t2); }); bar(350, 50, 590, 40); lim(350, 102, 590, 40); tiles.forEach(([k, val], i) => { const x = 350 + (i % 3) * 200; const y = 156 + Math.floor(i / 3) * 66; b += v.R(x, y, 190, 58, 10, '#18293B', '#24384E', 1); b += v.T(x + 12, y + 9, k, 11, '#8AA0B6', 'start', 600); b += v.T(x + 12, y + 27, val, 20, '#FFFFFF', 'start', 700); }); return v.SVG(960, 430, b); } bar(16, 44, 368, 38); lim(16, 92, 368, 38); mods.forEach(([s2, t2], i) => { b += v.MODULE(16 + (i < 5 ? 0 : 192), 144 + (i % 5) * 31, 176, i + 1, s2, t2); }); tiles.forEach(([k, val], i) => { const x = 16 + (i % 2) * 192; const y = 306 + Math.floor(i / 2) * 60; b += v.R(x, y, 176, 52, 10, '#18293B', '#24384E', 1); b += v.T(x + 12, y + 8, k, 10, '#8AA0B6', 'start', 600); b += v.T(x + 12, y + 24, val, 17, '#FFFFFF', 'start', 700); }); return v.SVG(400, 670, b); ]]]"
+  vic_tap:
+    show_name: false
+    show_icon: false
+    show_state: false
+    styles:
+      card:
+        - background: transparent
+        - box-shadow: none
+        - border: none
+        - height: 100%
+        - width: 100%
+        - padding: "0"
+        - border-radius: 8px
+  vic_lynx:
+    template: vic_base
+    variables:
+      names:
+        a:
+          - MPPT1
+          - MPPT2
+          - MPPT3
+          - Cerbo
+        b:
+          - US5 1
+          - US5 2
+          - US2 1-4
+          - US2 5-8
+        c:
+          - MPII 1
+          - MPII 2
+          - MPII 3
+          - leer
+    triggers_update:
+      - binary_sensor.lynx_monitor_lynx_a_fuse_1_broken
+      - binary_sensor.lynx_monitor_lynx_a_fuse_2_broken
+      - binary_sensor.lynx_monitor_lynx_a_fuse_3_broken
+      - binary_sensor.lynx_monitor_lynx_a_fuse_4_broken
+      - binary_sensor.lynx_monitor_lynx_b_fuse_1_broken
+      - binary_sensor.lynx_monitor_lynx_b_fuse_2_broken
+      - binary_sensor.lynx_monitor_lynx_b_fuse_3_broken
+      - binary_sensor.lynx_monitor_lynx_b_fuse_4_broken
+      - binary_sensor.lynx_monitor_lynx_c_fuse_1_broken
+      - binary_sensor.lynx_monitor_lynx_c_fuse_2_broken
+      - binary_sensor.lynx_monitor_lynx_c_fuse_3_broken
+      - binary_sensor.lynx_monitor_lynx_c_fuse_4_broken
+    custom_fields:
+      svg: "[[[ const v = variables; const mob = v.m; const st = (e) => states[e] ? states[e].state : 'unavailable'; const names = v.names || {}; let b = `<defs><linearGradient id='lynxg' x1='0' y1='0' x2='0' y2='1'><stop offset='0' stop-color='#3B90C9'/><stop offset='1' stop-color='#25639A'/></linearGradient><filter id='glow' x='-60%' y='-60%' width='220%' height='220%'><feGaussianBlur stdDeviation='3'/></filter></defs>`; const unit = (x, y, L) => { let s = ''; const fs = [1, 2, 3, 4].map(n => st('binary_sensor.lynx_monitor_lynx_' + L + '_fuse_' + n + '_broken')); const bad = fs.filter(f => f === 'on').length; const off = fs.filter(f => f !== 'on' && f !== 'off').length; s += v.T(x, y + 3, 'Lynx ' + L.toUpperCase(), 16, '#FFFFFF', 'start', 700); s += bad ? v.PILL(x + 300, y, bad + ' defekt', '#E5484D', '#FFFFFF') : (off ? v.PILL(x + 300, y, 'offline', '#2B3B4C', '#9FB3C8') : v.PILL(x + 300, y, 'Alle OK', '#5DBE6E', '#0F1A26')); const hx = x, hy = y + 32; s += v.R(hx, hy, 300, 170, 14, 'url(#lynxg)', '#5AA6DD', 1); s += v.R(hx + 8, hy + 8, 284, 22, 6, '#1A1F26'); s += v.T(hx + 18, hy + 13, 'victron energy', 10, '#FFFFFF', 'start', 700); s += v.T(hx + 282, hy + 14, 'LYNX DISTRIBUTOR', 9, '#9FB6CF', 'end', 600); s += v.R(hx + 14, hy + 38, 272, 12, 3, '#C87533'); s += v.T(hx + 20, hy + 39, '+', 10, '#5A3418', 'start', 700); const nm = names[L] || []; fs.forEach((f, k) => { const fx = hx + 24 + k * 66; const broken = f === 'on'; const ok = f === 'off'; const led = broken ? '#FF3B30' : (ok ? '#3CCF5A' : '#6E8399'); s += v.C(fx + 26, hy + 44, 4, '#7A4A22'); s += v.R(fx + 22, hy + 48, 8, 10, 2, '#9AA3AB'); s += v.R(fx, hy + 56, 52, 54, 6, broken ? '#3A1E1E' : '#F2F4F6', broken ? '#FF3B30' : '#C9D0D6', broken ? 2 : 1); s += v.R(fx + 8, hy + 64, 36, 20, 3, broken ? '#5A2A2A' : '#F7C948'); s += v.T(fx + 26, hy + 68, 'F' + (k + 1), 11, broken ? '#FF8A80' : '#3A2A00', 'middle', 700); s += v.T(fx + 26, hy + 92, 'MEGA', 9, broken ? '#FF8A80' : '#5A6672', 'middle', 700); s += v.R(fx + 22, hy + 110, 8, 8, 2, '#9AA3AB'); s += `<circle cx='${fx + 26}' cy='${hy + 130}' r='11' fill='${led}' opacity='0.5' filter='url(#glow)'>` + (broken ? `<animate attributeName='opacity' values='0.95;0.15;0.95' dur='1.2s' repeatCount='indefinite'/>` : '') + `</circle>`; s += v.C(fx + 26, hy + 130, 6, led); if (ok || broken) s += v.C(fx + 24, hy + 128, 1.8, '#FFFFFF'); s += v.R(fx + 16, hy + 144, 20, 20, 4, '#C87533'); s += v.C(fx + 26, hy + 154, 4, '#7A4A22'); const label = String(nm[k] || ('Abgang ' + (k + 1))).slice(0, 12); s += v.T(fx + 26, y + 210, label, 10, '#FFFFFF', 'middle', 600); s += v.T(fx + 26, y + 226, broken ? 'DEFEKT' : (ok ? 'OK' : '--'), 10, led, 'middle', 700); }); return s; }; const L3 = ['a', 'b', 'c']; if (!mob) { L3.forEach((L, i) => { b += unit(15 + i * 315, 16, L); }); return v.SVG(960, 262, b); } L3.forEach((L, i) => { b += `<g transform='translate(16,${12 + i * 310}) scale(1.2267)'>` + unit(0, 0, L) + `</g>`; }); return v.SVG(400, 940, b); ]]]"
+  vic_mpctl:
+    template: vic_base
+    triggers_update:
+      - select.victron_vebus_mode_227
+      - switch.ess_force_charge
+      - number.gx_device_ess_max_ladestrom
+      - sensor.victron_vebus_error_227
+      - sensor.victron_vebus_alarm_overload_227
+      - sensor.victron_vebus_alarm_lowbattery_227
+      - sensor.victron_vebus_alarm_hightemperature_227
+      - sensor.victron_vebus_alarm_temperaturesensor_227
+      - sensor.victron_vebus_alarm_voltagesensor_227
+      - sensor.victron_vebus_alarm_phaserotation_227
+      - sensor.victron_vebus_alarm_l1_overload_227
+      - sensor.victron_vebus_alarm_l2_overload_227
+      - sensor.victron_vebus_alarm_l3_overload_227
+      - sensor.victron_vebus_alarm_l1_lowbattery_227
+      - sensor.victron_vebus_alarm_l2_lowbattery_227
+      - sensor.victron_vebus_alarm_l3_lowbattery_227
+      - sensor.victron_vebus_alarm_l1_higtemperature_227
+      - sensor.victron_vebus_alarm_l2_higtemperature_227
+      - sensor.victron_vebus_alarm_l3_higtemperature_227
+      - sensor.victron_vebus_alarm_l1_ripple_227
+      - sensor.victron_vebus_alarm_l2_ripple_227
+      - sensor.victron_vebus_alarm_l3_ripple_227
+      - input_number.solar_ziel_ladestrom
+    custom_fields:
+      svg: "[[[ const v = variables; const mob = v.m; const mode = v.st('select.victron_vebus_mode_227').toUpperCase(); const fc = v.st('switch.ess_force_charge') === 'on'; const act = v.num('number.gx_device_ess_max_ladestrom'); const tgt = v.num('input_number.solar_ziel_ladestrom'); const cur = isNaN(tgt) ? act : tgt; const pend = !isNaN(tgt) && !isNaN(act) && Math.round(tgt) !== Math.round(act); const va = 'sensor.victron_vebus_alarm_'; const ids = ['overload', 'lowbattery', 'hightemperature', 'temperaturesensor', 'voltagesensor', 'phaserotation', 'l1_overload', 'l2_overload', 'l3_overload', 'l1_lowbattery', 'l2_lowbattery', 'l3_lowbattery', 'l1_higtemperature', 'l2_higtemperature', 'l3_higtemperature', 'l1_ripple', 'l2_ripple', 'l3_ripple']; const al = ids.map(i => v.st(va + i + '_227').toUpperCase()); const err = v.st('sensor.victron_vebus_error_227').toUpperCase(); const lvl = (al.includes('ALARM') || !['OK', 'UNKNOWN', 'UNAVAILABLE', '0'].includes(err)) ? 2 : (al.includes('WARNING') ? 1 : 0); const W = mob ? 400 : 960; let b = ''; b += v.T(16, 14, mob ? 'MultiPlus-System' : 'Steuerung MultiPlus-System (L1 – L3)', mob ? 16 : 18, '#FFFFFF', 'start', 700); b += v.BELL(W - 26, 22, lvl); b += v.T(W - 42, 15, lvl === 2 ? 'Alarm' : (lvl === 1 ? 'Warnung' : 'Kein Alarm'), 12, lvl === 2 ? '#E5484D' : (lvl === 1 ? '#F7AB3E' : '#5DBE6E'), 'end', 700); const modes = [['ON', 'Ein'], ['CHARGER', 'Nur Laden'], ['INVERTER', 'Nur WR'], ['OFF', 'Aus']]; const seg = (x, y, w, h, k, label) => { const act = mode === k; const col = k === 'OFF' ? '#E5484D' : '#387DC5'; b += v.R(x, y, w, h, 10, act ? col : '#18293B', act ? col : '#24384E', act ? 0 : 1); b += v.T(x + w / 2, y + h / 2 - 8, label, 15, act ? '#FFFFFF' : '#9FB3C8', 'middle', 700); }; const tog = (x, y, w, h) => { b += v.R(x, y, w, h, 10, '#18293B', fc ? '#F7AB3E' : '#24384E', fc ? 2 : 1); b += v.T(x + 14, y + h / 2 - 8, 'Aus dem Netz laden', 15, fc ? '#F7AB3E' : '#FFFFFF', 'start', 700); const tx = x + w - 62; b += v.R(tx, y + h / 2 - 12, 48, 24, 12, fc ? '#F7AB3E' : '#2B4560'); b += v.C(fc ? tx + 36 : tx + 12, y + h / 2, 9, '#FFFFFF'); }; const cbar = (x, y, w, h) => { b += v.R(x, y, w, h, h / 2, '#18293B', '#24384E', 1); if (!isNaN(cur) && cur > 0) b += v.R(x, y, Math.max(h, w * Math.min(1, cur / 400)), h, h / 2, pend ? '#F7AB3E' : '#387DC5'); b += v.T(x + w / 2, y + h / 2 - 11, 'Max. Ladestrom ' + (isNaN(cur) ? '--' : (cur < 0 ? 'unbegrenzt' : Math.round(cur) + ' A')) + (pend ? (mob ? ' …' : ' · wird übernommen …') : ''), mob ? 18 : 22, '#FFFFFF', 'middle', 700); [['-', x + 4], ['+', x + w - 4 - (h - 4)]].forEach(([sg, xx]) => { b += v.R(xx, y + 2, h - 4, h - 4, (h - 4) / 2, '#0F1A26', '#8FA3B5', 2); const cx = xx + (h - 4) / 2, cy = y + h / 2, a = 7; b += `<line x1='${cx - a}' y1='${cy}' x2='${cx + a}' y2='${cy}' stroke='#FFFFFF' stroke-width='2.5' stroke-linecap='round'/>`; if (sg === '+') b += `<line x1='${cx}' y1='${cy - a}' x2='${cx}' y2='${cy + a}' stroke='#FFFFFF' stroke-width='2.5' stroke-linecap='round'/>`; }); }; if (!mob) { modes.forEach(([k, l], i) => seg(20 + i * 126, 48, 120, 40, k, l)); tog(560, 48, 380, 40); cbar(20, 100, 920, 40); return v.SVG(960, 156, b); } modes.forEach(([k, l], i) => seg(16 + (i % 2) * 190, 44 + Math.floor(i / 2) * 46, 178, 40, k, l)); tog(16, 140, 368, 40); cbar(16, 192, 368, 38); return v.SVG(400, 244, b); ]]]"
+views:
+  - title: "Solar Übersicht"
+    path: solar
+    icon: mdi:solar-power-variant
+    type: sections
+    max_columns: 3
+    sections:
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Energiefluss
+            icon: mdi:transmission-tower
+          - type: custom:button-card
+            template: vic_flow
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+          - type: custom:button-card
+            template: vic_flow
+            variables:
+              m: true
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Heute
+            icon: mdi:calendar-today
+          - type: custom:button-card
+            template: vic_energy
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+          - type: custom:button-card
+            template: vic_energy
+            variables:
+              m: true
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Solarladeregler (MPPT)
+            icon: mdi:solar-panel
+          - type: custom:button-card
+            template: vic_mppt
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              id: "0"
+              name: MPPT 1
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            triggers_update:
+              - sensor.victron_solarcharger_state_0
+              - sensor.victron_solarcharger_yield_power_0
+              - sensor.victron_solarcharger_pv_voltage_0
+              - sensor.victron_solarcharger_pv_current_0
+              - sensor.victron_solarcharger_battery_voltage_0
+              - sensor.victron_solarcharger_battery_current_0
+              - sensor.victron_solarcharger_yield_today_0
+              - sensor.victron_solarcharger_maxpower_today_0
+              - sensor.victron_solarcharger_tracker_0_pv_power_0
+              - sensor.victron_solarcharger_tracker_1_pv_power_0
+              - sensor.victron_solarcharger_tracker_2_pv_power_0
+              - sensor.victron_solarcharger_tracker_3_pv_power_0
+              - select.victron_solarcharger_mode_0
+              - sensor.victron_solarcharger_alarm_0
+              - sensor.victron_solarcharger_alarm_highvoltage_0
+              - sensor.victron_solarcharger_alarm_lowvoltage_0
+              - sensor.victron_solarcharger_errorcode_0
+            custom_fields:
+              t_pwr:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_solarcharger_mode_0
+                    data:
+                      option: "[[[ return states['select.victron_solarcharger_mode_0'].state === 'ON' ? 'OFF' : 'ON'; ]]]"
+                    confirmation:
+                      text: "[[[ return states['select.victron_solarcharger_mode_0'].state === 'ON' ? 'MPPT 1 ausschalten?' : 'MPPT 1 einschalten?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_pwr:
+                  - position: absolute
+                  - left: 50.5%
+                  - top: 4%
+                  - width: 10%
+                  - height: 8%
+                  - z-index: "2"
+          - type: custom:button-card
+            template: vic_mppt
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              id: "1"
+              name: MPPT 2
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            triggers_update:
+              - sensor.victron_solarcharger_state_1
+              - sensor.victron_solarcharger_yield_power_1
+              - sensor.victron_solarcharger_pv_voltage_1
+              - sensor.victron_solarcharger_pv_current_1
+              - sensor.victron_solarcharger_battery_voltage_1
+              - sensor.victron_solarcharger_battery_current_1
+              - sensor.victron_solarcharger_yield_today_1
+              - sensor.victron_solarcharger_maxpower_today_1
+              - sensor.victron_solarcharger_tracker_0_pv_power_1
+              - sensor.victron_solarcharger_tracker_1_pv_power_1
+              - sensor.victron_solarcharger_tracker_2_pv_power_1
+              - sensor.victron_solarcharger_tracker_3_pv_power_1
+              - select.victron_solarcharger_mode_1
+              - sensor.victron_solarcharger_alarm_1
+              - sensor.victron_solarcharger_alarm_highvoltage_1
+              - sensor.victron_solarcharger_alarm_lowvoltage_1
+              - sensor.victron_solarcharger_errorcode_1
+            custom_fields:
+              t_pwr:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_solarcharger_mode_1
+                    data:
+                      option: "[[[ return states['select.victron_solarcharger_mode_1'].state === 'ON' ? 'OFF' : 'ON'; ]]]"
+                    confirmation:
+                      text: "[[[ return states['select.victron_solarcharger_mode_1'].state === 'ON' ? 'MPPT 2 ausschalten?' : 'MPPT 2 einschalten?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_pwr:
+                  - position: absolute
+                  - left: 50.5%
+                  - top: 4%
+                  - width: 10%
+                  - height: 8%
+                  - z-index: "2"
+          - type: custom:button-card
+            template: vic_mppt
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              id: "226"
+              name: MPPT 3
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            triggers_update:
+              - sensor.victron_solarcharger_state_226
+              - sensor.victron_solarcharger_yield_power_226
+              - sensor.victron_solarcharger_pv_voltage_226
+              - sensor.victron_solarcharger_pv_current_226
+              - sensor.victron_solarcharger_battery_voltage_226
+              - sensor.victron_solarcharger_battery_current_226
+              - sensor.victron_solarcharger_yield_today_226
+              - sensor.victron_solarcharger_maxpower_today_226
+              - sensor.victron_solarcharger_tracker_0_pv_power_226
+              - sensor.victron_solarcharger_tracker_1_pv_power_226
+              - sensor.victron_solarcharger_tracker_2_pv_power_226
+              - sensor.victron_solarcharger_tracker_3_pv_power_226
+              - select.victron_solarcharger_mode_226
+              - sensor.victron_solarcharger_alarm_226
+              - sensor.victron_solarcharger_alarm_highvoltage_226
+              - sensor.victron_solarcharger_alarm_lowvoltage_226
+              - sensor.victron_solarcharger_errorcode_226
+            custom_fields:
+              t_pwr:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_solarcharger_mode_226
+                    data:
+                      option: "[[[ return states['select.victron_solarcharger_mode_226'].state === 'ON' ? 'OFF' : 'ON'; ]]]"
+                    confirmation:
+                      text: "[[[ return states['select.victron_solarcharger_mode_226'].state === 'ON' ? 'MPPT 3 ausschalten?' : 'MPPT 3 einschalten?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_pwr:
+                  - position: absolute
+                  - left: 50.5%
+                  - top: 4%
+                  - width: 10%
+                  - height: 8%
+                  - z-index: "2"
+          - type: custom:button-card
+            template: vic_mppt
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              id: "0"
+              name: MPPT 1
+              m: true
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            triggers_update:
+              - sensor.victron_solarcharger_state_0
+              - sensor.victron_solarcharger_yield_power_0
+              - sensor.victron_solarcharger_pv_voltage_0
+              - sensor.victron_solarcharger_pv_current_0
+              - sensor.victron_solarcharger_battery_voltage_0
+              - sensor.victron_solarcharger_battery_current_0
+              - sensor.victron_solarcharger_yield_today_0
+              - sensor.victron_solarcharger_maxpower_today_0
+              - sensor.victron_solarcharger_tracker_0_pv_power_0
+              - sensor.victron_solarcharger_tracker_1_pv_power_0
+              - sensor.victron_solarcharger_tracker_2_pv_power_0
+              - sensor.victron_solarcharger_tracker_3_pv_power_0
+              - select.victron_solarcharger_mode_0
+              - sensor.victron_solarcharger_alarm_0
+              - sensor.victron_solarcharger_alarm_highvoltage_0
+              - sensor.victron_solarcharger_alarm_lowvoltage_0
+              - sensor.victron_solarcharger_errorcode_0
+            custom_fields:
+              t_pwr:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_solarcharger_mode_0
+                    data:
+                      option: "[[[ return states['select.victron_solarcharger_mode_0'].state === 'ON' ? 'OFF' : 'ON'; ]]]"
+                    confirmation:
+                      text: "[[[ return states['select.victron_solarcharger_mode_0'].state === 'ON' ? 'MPPT 1 ausschalten?' : 'MPPT 1 einschalten?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_pwr:
+                  - position: absolute
+                  - left: 50.5%
+                  - top: 5.04%
+                  - width: 10%
+                  - height: 10.08%
+                  - z-index: "2"
+          - type: custom:button-card
+            template: vic_mppt
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              id: "1"
+              name: MPPT 2
+              m: true
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            triggers_update:
+              - sensor.victron_solarcharger_state_1
+              - sensor.victron_solarcharger_yield_power_1
+              - sensor.victron_solarcharger_pv_voltage_1
+              - sensor.victron_solarcharger_pv_current_1
+              - sensor.victron_solarcharger_battery_voltage_1
+              - sensor.victron_solarcharger_battery_current_1
+              - sensor.victron_solarcharger_yield_today_1
+              - sensor.victron_solarcharger_maxpower_today_1
+              - sensor.victron_solarcharger_tracker_0_pv_power_1
+              - sensor.victron_solarcharger_tracker_1_pv_power_1
+              - sensor.victron_solarcharger_tracker_2_pv_power_1
+              - sensor.victron_solarcharger_tracker_3_pv_power_1
+              - select.victron_solarcharger_mode_1
+              - sensor.victron_solarcharger_alarm_1
+              - sensor.victron_solarcharger_alarm_highvoltage_1
+              - sensor.victron_solarcharger_alarm_lowvoltage_1
+              - sensor.victron_solarcharger_errorcode_1
+            custom_fields:
+              t_pwr:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_solarcharger_mode_1
+                    data:
+                      option: "[[[ return states['select.victron_solarcharger_mode_1'].state === 'ON' ? 'OFF' : 'ON'; ]]]"
+                    confirmation:
+                      text: "[[[ return states['select.victron_solarcharger_mode_1'].state === 'ON' ? 'MPPT 2 ausschalten?' : 'MPPT 2 einschalten?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_pwr:
+                  - position: absolute
+                  - left: 50.5%
+                  - top: 5.04%
+                  - width: 10%
+                  - height: 10.08%
+                  - z-index: "2"
+          - type: custom:button-card
+            template: vic_mppt
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              id: "226"
+              name: MPPT 3
+              m: true
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            triggers_update:
+              - sensor.victron_solarcharger_state_226
+              - sensor.victron_solarcharger_yield_power_226
+              - sensor.victron_solarcharger_pv_voltage_226
+              - sensor.victron_solarcharger_pv_current_226
+              - sensor.victron_solarcharger_battery_voltage_226
+              - sensor.victron_solarcharger_battery_current_226
+              - sensor.victron_solarcharger_yield_today_226
+              - sensor.victron_solarcharger_maxpower_today_226
+              - sensor.victron_solarcharger_tracker_0_pv_power_226
+              - sensor.victron_solarcharger_tracker_1_pv_power_226
+              - sensor.victron_solarcharger_tracker_2_pv_power_226
+              - sensor.victron_solarcharger_tracker_3_pv_power_226
+              - select.victron_solarcharger_mode_226
+              - sensor.victron_solarcharger_alarm_226
+              - sensor.victron_solarcharger_alarm_highvoltage_226
+              - sensor.victron_solarcharger_alarm_lowvoltage_226
+              - sensor.victron_solarcharger_errorcode_226
+            custom_fields:
+              t_pwr:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_solarcharger_mode_226
+                    data:
+                      option: "[[[ return states['select.victron_solarcharger_mode_226'].state === 'ON' ? 'OFF' : 'ON'; ]]]"
+                    confirmation:
+                      text: "[[[ return states['select.victron_solarcharger_mode_226'].state === 'ON' ? 'MPPT 3 ausschalten?' : 'MPPT 3 einschalten?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_pwr:
+                  - position: absolute
+                  - left: 50.5%
+                  - top: 5.04%
+                  - width: 10%
+                  - height: 10.08%
+                  - z-index: "2"
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: MultiPlus-II
+            icon: mdi:power-plug-battery
+          - type: custom:button-card
+            template: vic_multi
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              ph: l1
+              dev: "0"
+              name: MultiPlus-II L1
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            triggers_update:
+              - sensor.victron_vebus_state_227
+              - sensor.multiplus_ii_1_dc_voltage
+              - sensor.multiplus_ii_1_ve_bus_gerat_0_inverter_leistung
+              - sensor.multiplus_ii_1_wechselrichter_eingangsspannung_l1
+              - sensor.multiplus_ii_1_wechselrichter_eingangsfrequenz_l1
+              - sensor.multiplus_ii_1_wechselrichter_eingangsleistung_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsspannung_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsstrom_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsleistung_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsfrequenz_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangs_scheinleistung_l1
+              - sensor.victron_vebus_error_227
+              - sensor.victron_vebus_alarm_l1_overload_227
+              - sensor.victron_vebus_alarm_l1_lowbattery_227
+              - sensor.victron_vebus_alarm_l1_higtemperature_227
+              - sensor.victron_vebus_alarm_l1_ripple_227
+              - sensor.victron_vebus_alarm_overload_227
+              - sensor.victron_vebus_alarm_lowbattery_227
+              - sensor.victron_vebus_alarm_hightemperature_227
+              - sensor.victron_vebus_alarm_temperaturesensor_227
+              - sensor.victron_vebus_alarm_voltagesensor_227
+              - sensor.victron_vebus_alarm_phaserotation_227
+          - type: custom:button-card
+            template: vic_multi
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              ph: l2
+              dev: "1"
+              name: MultiPlus-II L2
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            triggers_update:
+              - sensor.victron_vebus_state_227
+              - sensor.multiplus_ii_1_dc_voltage
+              - sensor.multiplus_ii_1_ve_bus_gerat_1_inverter_leistung
+              - sensor.multiplus_ii_1_wechselrichter_eingangsspannung_l2
+              - sensor.multiplus_ii_1_wechselrichter_eingangsfrequenz_l2
+              - sensor.multiplus_ii_1_wechselrichter_eingangsleistung_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsspannung_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsstrom_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsleistung_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsfrequenz_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangs_scheinleistung_l2
+              - sensor.victron_vebus_error_227
+              - sensor.victron_vebus_alarm_l2_overload_227
+              - sensor.victron_vebus_alarm_l2_lowbattery_227
+              - sensor.victron_vebus_alarm_l2_higtemperature_227
+              - sensor.victron_vebus_alarm_l2_ripple_227
+              - sensor.victron_vebus_alarm_overload_227
+              - sensor.victron_vebus_alarm_lowbattery_227
+              - sensor.victron_vebus_alarm_hightemperature_227
+              - sensor.victron_vebus_alarm_temperaturesensor_227
+              - sensor.victron_vebus_alarm_voltagesensor_227
+              - sensor.victron_vebus_alarm_phaserotation_227
+          - type: custom:button-card
+            template: vic_multi
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              ph: l3
+              dev: "2"
+              name: MultiPlus-II L3
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            triggers_update:
+              - sensor.victron_vebus_state_227
+              - sensor.multiplus_ii_1_dc_voltage
+              - sensor.multiplus_ii_1_ve_bus_gerat_2_inverter_leistung
+              - sensor.multiplus_ii_1_wechselrichter_eingangsspannung_l3
+              - sensor.multiplus_ii_1_wechselrichter_eingangsfrequenz_l3
+              - sensor.multiplus_ii_1_wechselrichter_eingangsleistung_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsspannung_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsstrom_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsleistung_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsfrequenz_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangs_scheinleistung_l3
+              - sensor.victron_vebus_error_227
+              - sensor.victron_vebus_alarm_l3_overload_227
+              - sensor.victron_vebus_alarm_l3_lowbattery_227
+              - sensor.victron_vebus_alarm_l3_higtemperature_227
+              - sensor.victron_vebus_alarm_l3_ripple_227
+              - sensor.victron_vebus_alarm_overload_227
+              - sensor.victron_vebus_alarm_lowbattery_227
+              - sensor.victron_vebus_alarm_hightemperature_227
+              - sensor.victron_vebus_alarm_temperaturesensor_227
+              - sensor.victron_vebus_alarm_voltagesensor_227
+              - sensor.victron_vebus_alarm_phaserotation_227
+          - type: custom:button-card
+            template: vic_multi
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              ph: l1
+              dev: "0"
+              name: MultiPlus-II L1
+              m: true
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            triggers_update:
+              - sensor.victron_vebus_state_227
+              - sensor.multiplus_ii_1_dc_voltage
+              - sensor.multiplus_ii_1_ve_bus_gerat_0_inverter_leistung
+              - sensor.multiplus_ii_1_wechselrichter_eingangsspannung_l1
+              - sensor.multiplus_ii_1_wechselrichter_eingangsfrequenz_l1
+              - sensor.multiplus_ii_1_wechselrichter_eingangsleistung_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsspannung_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsstrom_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsleistung_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsfrequenz_l1
+              - sensor.multiplus_ii_1_wechselrichter_ausgangs_scheinleistung_l1
+              - sensor.victron_vebus_error_227
+              - sensor.victron_vebus_alarm_l1_overload_227
+              - sensor.victron_vebus_alarm_l1_lowbattery_227
+              - sensor.victron_vebus_alarm_l1_higtemperature_227
+              - sensor.victron_vebus_alarm_l1_ripple_227
+              - sensor.victron_vebus_alarm_overload_227
+              - sensor.victron_vebus_alarm_lowbattery_227
+              - sensor.victron_vebus_alarm_hightemperature_227
+              - sensor.victron_vebus_alarm_temperaturesensor_227
+              - sensor.victron_vebus_alarm_voltagesensor_227
+              - sensor.victron_vebus_alarm_phaserotation_227
+          - type: custom:button-card
+            template: vic_multi
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              ph: l2
+              dev: "1"
+              name: MultiPlus-II L2
+              m: true
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            triggers_update:
+              - sensor.victron_vebus_state_227
+              - sensor.multiplus_ii_1_dc_voltage
+              - sensor.multiplus_ii_1_ve_bus_gerat_1_inverter_leistung
+              - sensor.multiplus_ii_1_wechselrichter_eingangsspannung_l2
+              - sensor.multiplus_ii_1_wechselrichter_eingangsfrequenz_l2
+              - sensor.multiplus_ii_1_wechselrichter_eingangsleistung_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsspannung_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsstrom_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsleistung_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsfrequenz_l2
+              - sensor.multiplus_ii_1_wechselrichter_ausgangs_scheinleistung_l2
+              - sensor.victron_vebus_error_227
+              - sensor.victron_vebus_alarm_l2_overload_227
+              - sensor.victron_vebus_alarm_l2_lowbattery_227
+              - sensor.victron_vebus_alarm_l2_higtemperature_227
+              - sensor.victron_vebus_alarm_l2_ripple_227
+              - sensor.victron_vebus_alarm_overload_227
+              - sensor.victron_vebus_alarm_lowbattery_227
+              - sensor.victron_vebus_alarm_hightemperature_227
+              - sensor.victron_vebus_alarm_temperaturesensor_227
+              - sensor.victron_vebus_alarm_voltagesensor_227
+              - sensor.victron_vebus_alarm_phaserotation_227
+          - type: custom:button-card
+            template: vic_multi
+            grid_options:
+              columns: 12
+              rows: auto
+            variables:
+              ph: l3
+              dev: "2"
+              name: MultiPlus-II L3
+              m: true
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            triggers_update:
+              - sensor.victron_vebus_state_227
+              - sensor.multiplus_ii_1_dc_voltage
+              - sensor.multiplus_ii_1_ve_bus_gerat_2_inverter_leistung
+              - sensor.multiplus_ii_1_wechselrichter_eingangsspannung_l3
+              - sensor.multiplus_ii_1_wechselrichter_eingangsfrequenz_l3
+              - sensor.multiplus_ii_1_wechselrichter_eingangsleistung_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsspannung_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsstrom_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsleistung_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangsfrequenz_l3
+              - sensor.multiplus_ii_1_wechselrichter_ausgangs_scheinleistung_l3
+              - sensor.victron_vebus_error_227
+              - sensor.victron_vebus_alarm_l3_overload_227
+              - sensor.victron_vebus_alarm_l3_lowbattery_227
+              - sensor.victron_vebus_alarm_l3_higtemperature_227
+              - sensor.victron_vebus_alarm_l3_ripple_227
+              - sensor.victron_vebus_alarm_overload_227
+              - sensor.victron_vebus_alarm_lowbattery_227
+              - sensor.victron_vebus_alarm_hightemperature_227
+              - sensor.victron_vebus_alarm_temperaturesensor_227
+              - sensor.victron_vebus_alarm_voltagesensor_227
+              - sensor.victron_vebus_alarm_phaserotation_227
+          - type: custom:button-card
+            template: vic_mpctl
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            custom_fields:
+              t_m0:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: "ON"
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Ein“ schalten?"
+              t_m1:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: CHARGER
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Nur Laden“ schalten?"
+              t_m2:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: INVERTER
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Nur WR“ schalten?"
+              t_m3:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: "OFF"
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Aus“ schalten?"
+              t_fc:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: switch.toggle
+                    target:
+                      entity_id: switch.ess_force_charge
+                    confirmation:
+                      text: "[[[ return states['switch.ess_force_charge'].state === 'on' ? 'Laden aus dem Netz beenden?' : 'Akku jetzt aus dem Netz laden (ESS Force charge)?'; ]]]"
+              t_cm:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_number.set_value
+                    target:
+                      entity_id: input_number.solar_ziel_ladestrom
+                    data:
+                      value: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); return n < 0 ? 300 : Math.max(0, n - 10); ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); const z = n < 0 ? 300 : Math.max(0, n - 10); return 'Max. Ladestrom auf ' + z + ' A ändern?'; ]]]"
+              t_cp:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_number.set_value
+                    target:
+                      entity_id: input_number.solar_ziel_ladestrom
+                    data:
+                      value: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); return n < 0 ? -1 : n + 10; ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); const z = n < 0 ? -1 : n + 10; return 'Max. Ladestrom auf ' + (z < 0 ? 'unbegrenzt' : z + ' A') + ' ändern?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_m0:
+                  - position: absolute
+                  - left: 2.08%
+                  - top: 30.77%
+                  - width: 12.5%
+                  - height: 25.64%
+                  - z-index: "2"
+                t_m1:
+                  - position: absolute
+                  - left: 15.21%
+                  - top: 30.77%
+                  - width: 12.5%
+                  - height: 25.64%
+                  - z-index: "2"
+                t_m2:
+                  - position: absolute
+                  - left: 28.33%
+                  - top: 30.77%
+                  - width: 12.5%
+                  - height: 25.64%
+                  - z-index: "2"
+                t_m3:
+                  - position: absolute
+                  - left: 41.46%
+                  - top: 30.77%
+                  - width: 12.5%
+                  - height: 25.64%
+                  - z-index: "2"
+                t_fc:
+                  - position: absolute
+                  - left: 58.33%
+                  - top: 30.77%
+                  - width: 39.58%
+                  - height: 25.64%
+                  - z-index: "2"
+                t_cm:
+                  - position: absolute
+                  - left: 2.5%
+                  - top: 65.38%
+                  - width: 3.75%
+                  - height: 23.08%
+                  - z-index: "2"
+                t_cp:
+                  - position: absolute
+                  - left: 93.75%
+                  - top: 65.38%
+                  - width: 3.75%
+                  - height: 23.08%
+                  - z-index: "2"
+          - type: custom:button-card
+            template: vic_mpctl
+            variables:
+              m: true
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            custom_fields:
+              t_m0:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: "ON"
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Ein“ schalten?"
+              t_m1:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: CHARGER
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Nur Laden“ schalten?"
+              t_m2:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: INVERTER
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Nur WR“ schalten?"
+              t_m3:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: select.select_option
+                    target:
+                      entity_id: select.victron_vebus_mode_227
+                    data:
+                      option: "OFF"
+                    confirmation:
+                      text: "MultiPlus-System (alle 3 Geräte) auf „Aus“ schalten?"
+              t_fc:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: switch.toggle
+                    target:
+                      entity_id: switch.ess_force_charge
+                    confirmation:
+                      text: "[[[ return states['switch.ess_force_charge'].state === 'on' ? 'Laden aus dem Netz beenden?' : 'Akku jetzt aus dem Netz laden (ESS Force charge)?'; ]]]"
+              t_cm:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_number.set_value
+                    target:
+                      entity_id: input_number.solar_ziel_ladestrom
+                    data:
+                      value: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); return n < 0 ? 300 : Math.max(0, n - 10); ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); const z = n < 0 ? 300 : Math.max(0, n - 10); return 'Max. Ladestrom auf ' + z + ' A ändern?'; ]]]"
+              t_cp:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: input_number.set_value
+                    target:
+                      entity_id: input_number.solar_ziel_ladestrom
+                    data:
+                      value: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); return n < 0 ? -1 : n + 10; ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['input_number.solar_ziel_ladestrom'].state); const z = n < 0 ? -1 : n + 10; return 'Max. Ladestrom auf ' + (z < 0 ? 'unbegrenzt' : z + ' A') + ' ändern?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                t_m0:
+                  - position: absolute
+                  - left: 4%
+                  - top: 18.03%
+                  - width: 44.5%
+                  - height: 16.39%
+                  - z-index: "2"
+                t_m1:
+                  - position: absolute
+                  - left: 51.5%
+                  - top: 18.03%
+                  - width: 44.5%
+                  - height: 16.39%
+                  - z-index: "2"
+                t_m2:
+                  - position: absolute
+                  - left: 4%
+                  - top: 36.89%
+                  - width: 44.5%
+                  - height: 16.39%
+                  - z-index: "2"
+                t_m3:
+                  - position: absolute
+                  - left: 51.5%
+                  - top: 36.89%
+                  - width: 44.5%
+                  - height: 16.39%
+                  - z-index: "2"
+                t_fc:
+                  - position: absolute
+                  - left: 4%
+                  - top: 57.38%
+                  - width: 92%
+                  - height: 16.39%
+                  - z-index: "2"
+                t_cm:
+                  - position: absolute
+                  - left: 5%
+                  - top: 79.51%
+                  - width: 8.5%
+                  - height: 13.93%
+                  - z-index: "2"
+                t_cp:
+                  - position: absolute
+                  - left: 86.5%
+                  - top: 79.51%
+                  - width: 8.5%
+                  - height: 13.93%
+                  - z-index: "2"
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Pylontech Batteriespeicher
+            icon: mdi:battery-high
+          - type: custom:button-card
+            template: vic_pylon
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+            custom_fields:
+              soc_minus:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: number.set_value
+                    target:
+                      entity_id: number.gx_device_ess_mindest_soc_grenze
+                    data:
+                      value: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return Math.min(100, Math.max(0, n + (-5))); ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return 'Mindest-SoC (ESS) von ' + n + ' % auf ' + Math.min(100, Math.max(0, n + (-5))) + ' % ändern?'; ]]]"
+              soc_plus:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: number.set_value
+                    target:
+                      entity_id: number.gx_device_ess_mindest_soc_grenze
+                    data:
+                      value: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return Math.min(100, Math.max(0, n + (5))); ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return 'Mindest-SoC (ESS) von ' + n + ' % auf ' + Math.min(100, Math.max(0, n + (5))) + ' % ändern?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                soc_minus:
+                  - position: absolute
+                  - left: 36.88%
+                  - top: 24.19%
+                  - width: 3.75%
+                  - height: 8.37%
+                  - z-index: "2"
+                soc_plus:
+                  - position: absolute
+                  - left: 93.75%
+                  - top: 24.19%
+                  - width: 3.75%
+                  - height: 8.37%
+                  - z-index: "2"
+          - type: custom:button-card
+            template: vic_pylon
+            variables:
+              m: true
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
+            custom_fields:
+              soc_minus:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: number.set_value
+                    target:
+                      entity_id: number.gx_device_ess_mindest_soc_grenze
+                    data:
+                      value: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return Math.min(100, Math.max(0, n + (-5))); ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return 'Mindest-SoC (ESS) von ' + n + ' % auf ' + Math.min(100, Math.max(0, n + (-5))) + ' % ändern?'; ]]]"
+              soc_plus:
+                card:
+                  type: custom:button-card
+                  template: vic_tap
+                  tap_action:
+                    action: perform-action
+                    perform_action: number.set_value
+                    target:
+                      entity_id: number.gx_device_ess_mindest_soc_grenze
+                    data:
+                      value: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return Math.min(100, Math.max(0, n + (5))); ]]]"
+                    confirmation:
+                      text: "[[[ const n = parseFloat(states['number.gx_device_ess_mindest_soc_grenze'].state); return 'Mindest-SoC (ESS) von ' + n + ' % auf ' + Math.min(100, Math.max(0, n + (5))) + ' % ändern?'; ]]]"
+            styles:
+              card:
+                - position: relative
+              custom_fields:
+                soc_minus:
+                  - position: absolute
+                  - left: 5%
+                  - top: 14.03%
+                  - width: 8.5%
+                  - height: 5.07%
+                  - z-index: "2"
+                soc_plus:
+                  - position: absolute
+                  - left: 86.5%
+                  - top: 14.03%
+                  - width: 8.5%
+                  - height: 5.07%
+                  - z-index: "2"
+      - type: grid
+        column_span: 3
+        cards:
+          - type: heading
+            heading: Lynx
+            icon: mdi:fuse
+          - type: custom:button-card
+            template: vic_lynx
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(min-width: 768px)"
+          - type: custom:button-card
+            template: vic_lynx
+            variables:
+              m: true
+            grid_options:
+              columns: full
+              rows: auto
+            visibility:
+              - condition: screen
+                media_query: "(max-width: 767px)"
