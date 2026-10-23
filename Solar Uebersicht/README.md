@@ -4,6 +4,19 @@ Ein Dashboard für Home Assistant, das eine Victron-Anlage mit Pylontech-Speiche
 
 Jede Karte gibt es zweimal: eine **Desktop-Variante** (ab 768 px Breite) und eine eigene **Handy-Variante**, die Home Assistant automatisch je nach Bildschirmbreite zeigt.
 
+## Energiefluss in Bewegung
+
+![Animierter Energiefluss](docs/energiefluss-demo.svg)
+
+*Demo mit Beispielwerten (sonniger Mittag): Die Solaranlage liefert 4,23 kW, davon gehen 1,79 kW in den Akku, das Haus verbraucht 1,57 kW und 650 W werden ins Netz eingespeist. Die Punkte zeigen die Flussrichtung, und je mehr Leistung fließt, desto schneller laufen sie.*
+
+<details>
+<summary>Handy-Ansicht</summary>
+
+<img src="docs/energiefluss-demo-mobil.svg" width="400" alt="Animierter Energiefluss, Handy-Ansicht">
+
+</details>
+
 ## Ansichten
 
 ### Normale Ansicht (Desktop / Tablet)
