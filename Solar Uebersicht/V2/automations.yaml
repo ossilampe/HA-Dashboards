@@ -1,0 +1,54 @@
+- id: "1792261276620"
+  alias: "Solar: Ziel-Ladestrom an Cerbo übertragen"
+  description: "Überträgt input_number.solar_ziel_ladestrom (gesetzt vom Dashboard 'Solar Übersicht') an den DVCC-Ladestrom des Cerbo. 1 s Entprellung für schnelles Mehrfachtippen; bis zu 3 Versuche, weil der Cerbo gelegentlich einen Schreibbefehl ignoriert."
+  triggers:
+    - trigger: state
+      entity_id: input_number.solar_ziel_ladestrom
+  conditions:
+    - condition: template
+      value_template: "{{ states('input_number.solar_ziel_ladestrom') | is_number }}"
+      note: "Nur bei gültigem Zielwert"
+  actions:
+    - delay:
+        seconds: 1
+      note: "Entprellung: mode restart setzt bei weiterem Tippen neu an"
+    - repeat:
+        count: 3
+        sequence:
+          - if:
+              - condition: template
+                value_template: "{{ states('input_number.solar_ziel_ladestrom') | float(0) | round(0) == states('number.gx_device_ess_max_ladestrom') | float(-999) | round(0) }}"
+            then:
+              - stop: "Cerbo hat den Zielwert übernommen"
+          - action: number.set_value
+            target:
+              entity_id: number.gx_device_ess_max_ladestrom
+            data:
+              value: "{{ states('input_number.solar_ziel_ladestrom') | float(0) | round(0) | int }}"
+          - wait_template: "{{ states('input_number.solar_ziel_ladestrom') | float(0) | round(0) == states('number.gx_device_ess_max_ladestrom') | float(-999) | round(0) }}"
+            timeout:
+              seconds: 8
+            continue_on_timeout: true
+  mode: restart
+- id: "1792261277193"
+  alias: "Solar: Ziel-Ladestrom mit Cerbo abgleichen"
+  description: "Hält input_number.solar_ziel_ladestrom synchron, wenn der DVCC-Ladestrom am Cerbo anders geändert wird (VRM, Cerbo-Display). Gegenstück zu 'Solar: Ziel-Ladestrom an Cerbo übertragen'."
+  triggers:
+    - trigger: state
+      entity_id: number.gx_device_ess_max_ladestrom
+      not_to:
+        - unavailable
+        - unknown
+  conditions:
+    - condition: state
+      entity_id: automation.solar_ziel_ladestrom_an_cerbo_ubertragen
+      attribute: current
+      state: 0
+      note: "Nicht eingreifen, solange gerade ein Dashboard-Wert übertragen wird"
+  actions:
+    - action: input_number.set_value
+      target:
+        entity_id: input_number.solar_ziel_ladestrom
+      data:
+        value: "{{ trigger.to_state.state | float }}"
+  mode: queued
