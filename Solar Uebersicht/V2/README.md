@@ -57,8 +57,8 @@ flowchart LR
         PYL["Pylontech-Stapel<br/>2× US5000 · 8× US2000"] <--> LYNX
         CERBO["Cerbo GX"]
         PYL -- "CAN (BMS)" --> CERBO
-        MPPT -. VE.Can / VE.Direct .-> CERBO
-        MP -. VE.Bus .-> CERBO
+        MPPT -. "VE.Can / VE.Direct" .-> CERBO
+        MP -. "VE.Bus" .-> CERBO
     end
 
     PYL -- "Konsole RS232" --> ESP1["ESP<br/>Pylontech Batterie System 2"]
